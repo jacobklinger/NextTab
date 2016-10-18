@@ -1,0 +1,129 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    background: #eee;
+    overflow-x: hidden;
+}
+
+.site-area {
+    display: block;
+    position: relative;
+    text-align: left;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.site {
+    display: inline-block;
+    position: relative;
+    width: 160px;
+    height: 100px;
+    margin: 10px;
+    
+    border-radius: 6px;
+    
+    background-size: contain;
+    
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+    
+    transition: transform 0.2s ease;
+    -webkit-transition: transform 0.2s ease;
+}
+
+div.site:hover {
+    box-shadow: 0 0 15px rgba(0, 0, 0, .15);
+}
+
+a {
+    display: inline-block;
+}
+
+button.edit {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    padding: .25rem .5rem;
+    margin: .5rem;
+    background: #eee;
+    border-radius: 4px;
+    border: 1px solid #999;
+    outline: none;
+}
+
+button.edit:active {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    padding: .25rem .5rem;
+    margin: .5rem;
+    background: #ccc;
+    border-radius: 4px;
+    border: 1px solid #999;
+    outline: none;
+}
+
+div.edit[active="true"] {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 13px;
+    background: #FF3B30;
+    box-shadow: 0 0 4px rgba(0, 0, 0, .15);
+}
+
+div.edit[active="false"] {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background: #5AD427;
+    box-shadow: 0 0 4px rgba(0, 0, 0, .15);
+}
+
+div.edit[active="true"]::before {
+    position: absolute;
+    top: 4px;
+    left: 11px;
+    width: 2px;
+    height: 16px;
+    background: white;
+    content: "";
+    transform: rotate(45deg);
+}
+
+div.edit[active="true"]::after {
+    position: absolute;
+    top: 4px;
+    left: 11px;
+    width: 2px;
+    height: 16px;
+    background: white;
+    content: "";
+    transform: rotate(135deg);
+}
+
+div.edit[active="false"]::before {
+    position: absolute;
+    top: 4px;
+    left: 11px;
+    width: 2px;
+    height: 16px;
+    background: white;
+    content: "";
+}
+
+div.edit[active="false"]::after {
+    position: absolute;
+    top: 4px;
+    left: 11px;
+    width: 2px;
+    height: 16px;
+    background: white;
+    content: "";
+    transform: rotate(90deg);
+}
