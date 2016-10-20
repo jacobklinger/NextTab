@@ -234,8 +234,10 @@ NextTab.Driver = function() {
     *
     */
     function setup() {
+        checkForUpdates();
         addSkew3D();
         centerSites(SITE_WIDTH, SITE_MARGIN);
+        storageManager.updateStorage(siteCollection.activeSitesObjects(), siteCollection.inactiveSitesObjects());
     };
 
     /**
@@ -303,6 +305,43 @@ NextTab.Driver = function() {
         }
     };
     
+    function checkForUpdates() {
+        
+        var allCurrentSites = [];
+        
+        var active = siteCollection.activeSites();
+        
+        for (i = 0; i < active.length; i++) {
+            allCurrentSites.push(active[i]);
+        }
+        
+        var inactive = siteCollection.inactiveSites();
+        
+        for (i = 0; i < inactive.length; i++) {
+            allCurrentSites.push(inactive[i]);
+        }
+        
+        var allSites = siteCollection.allSites();
+        
+        for (k = 0; k < allSites.length; k++) {
+            var contains = isIn(allSites[k], allCurrentSites);
+            if (!contains) {
+                siteCollection.addActiveSite(allSites[k]);
+            }
+        }
+        
+        function isIn(item, list) {
+            for (j = 0; j < list.length; j++) {
+                if (item.site === list[j].name() && item.url === list[j].url() && item.image === list[j].image()) {
+                    return true;
+                }
+            }
+            
+            return false;
+        };
+        
+    }
+    
     // Width and margin of each site element
     var SITE_WIDTH = 160;
     var SITE_MARGIN = 10;
@@ -323,9 +362,8 @@ NextTab.StorageManager = function() {
     */
     this.create = function(siteCollectionObj, callback) {
         //Uncomment to reset everything (for development purposes)
-        chrome.storage.sync.clear();
+        //chrome.storage.sync.clear();
         
-        var contents = null;
         callbackFunction = callback;
         siteCollection = siteCollectionObj;
         
@@ -418,6 +456,16 @@ NextTab.SiteCollection = function() {
     };
     
     /*
+    * Adds a single site to the collection as an active site.
+    */
+    this.addActiveSite = function(obj) {
+        var site = new NextTab.Site();
+        site.create(obj.site, obj.url, obj.image, true);
+        activeSites.push(site);
+        document.getElementsByClassName("sites")[0].appendChild(site.element());; 
+    }
+    
+    /*
     * Creates a site object for each object in the given array.
     * Stores each object in as inactive sites.
     * @param storageInactiveSites
@@ -439,7 +487,7 @@ NextTab.SiteCollection = function() {
         
         for (i = 0; i < activeSites.length; i++) {
             var site = activeSites[i];
-            var obj = {name: site.name(), url: site.url(), image: site.image()};
+            var obj = {site: site.name(), url: site.url(), image: site.image()};
             activeSitesObjects.push(obj);
         }
         
@@ -454,7 +502,7 @@ NextTab.SiteCollection = function() {
         
         for (i = 0; i < inactiveSites.length; i++) {
             var site = inactiveSites[i];
-            var obj = {name: site.name(), url: site.url(), image: site.image()};
+            var obj = {site: site.name(), url: site.url(), image: site.image()};
             inactiveSitesObjects.push(obj);
         }
         
@@ -618,70 +666,115 @@ NextTab.SiteCollection = function() {
     
     // All of the built-in sites.
     var allSites = [{site: "google", url: "http://www.google.com", image: "/images/sites/google.png"},
-                    {site: "youtube", url: "http://www.youtube.com", image: "/images/sites/youtube.png"},
                     {site: "facebook", url: "http://www.facebook.com", image: "/images/sites/facebook.png"},
-                    {site: "amazon", url: "http://www.amazon.com", image: "/images/sites/amazon.png"},
-                    {site: "yahoo", url: "http://www.yahoo.com", image: "/images/sites/yahoo.png"},
-                    {site: "wikipedia", url: "http://www.wikipedia.com", image: "/images/sites/wikipedia.png"},
                     {site: "twitter", url: "http://www.twitter.com", image: "/images/sites/twitter.png"},
-                    {site: "reddit", url: "http://www.reddit.com", image: "/images/sites/reddit.png"},
-                    {site: "ebay", url: "http://www.ebay.com", image: "/images/sites/ebay.png"},
-                    {site: "linkedin", url: "http://www.linkedin.com", image: "/images/sites/linkedin.png"},
-                    {site: "craigslist", url: "http://www.craigslist.com", image: "/images/sites/craigslist.png"},
-                    {site: "netflix", url: "http://www.netflix.com", image: "/images/sites/netflix.png"},
-                    {site: "instagram", url: "http://www.instagram.com", image: "/images/sites/instagram.png"},
-                    {site: "espn", url: "http://www.espn.com", image: "/images/sites/espn.png"},
-                    {site: "pinterest", url: "http://www.pinterest.com", image: "/images/sites/pinterest.png"},
-                    {site: "imgur", url: "http://www.imgur.com", image: "/images/sites/imgur.png"},
-                    {site: "tumblr", url: "http://www.tumblr.com", image: "/images/sites/tumblr.png"},
-                    {site: "cnn", url: "http://www.cnn.com", image: "/images/sites/cnn.png"},
+                    {site: "amazon", url: "http://www.amazon.com", image: "/images/sites/amazon.png"},
+                    {site: "wikipedia", url: "http://www.wikipedia.com", image: "/images/sites/wikipedia.png"},
+                    
+                    {site: "youtube", url: "http://www.youtube.com", image: "/images/sites/youtube.png"},
+                    {site: "gmail", url: "http://mail.google.com/", image: "/images/sites/gmail.png"},
+                    {site: "google maps", url: "http://maps.google.com/", image: "/images/sites/maps.png"},
+                    
+                    {site: "yahoo", url: "http://www.yahoo.com", image: "/images/sites/yahoo.png"},
                     {site: "bing", url: "http://www.bing.com", image: "/images/sites/bing.png"},
-                    {site: "chase", url: "http://www.chase.com", image: "/images/sites/chase.png"},
-                    {site: "newyorktimes", url: "http://www.nytimes.com/", image: "/images/sites/newyorktimes.png"},
-                    {site: "paypal", url: "http://www.paypal.com/", image: "/images/sites/paypal.png"},
+                    
+                    {site: "reddit", url: "http://www.reddit.com", image: "/images/sites/reddit.png"},
+                    {site: "instagram", url: "http://www.instagram.com", image: "/images/sites/instagram.png"},
+                    {site: "pinterest", url: "http://www.pinterest.com", image: "/images/sites/pinterest.png"},
+                    {site: "tumblr", url: "http://www.tumblr.com", image: "/images/sites/tumblr.png"},
+                    
+                    {site: "netflix", url: "http://www.netflix.com", image: "/images/sites/netflix.png"},
+                    {site: "hulu", url: "http://www.hulu.com/", image: "/images/sites/hulu.png"},
+                    
                     {site: "fitbit", url: "http://www.fitbit.com/", image: "/images/sites/fitbit.png"},
                     {site: "quizlet", url: "http://www.quizlet.com/", image: "/images/sites/quizlet.png"},
+                    {site: "vimeo", url: "http://www.vimeo.com/", image: "/images/sites/vimeo.png"},
+                    
                     {site: "tripadvisor", url: "http://www.tripadvisor.com/", image: "/images/sites/tripadvisor.png"},
                     {site: "kayak", url: "http://www.kayak.com/", image: "/images/sites/kayak.png"},
                     {site: "airbnb", url: "http://www.airbnb.com/", image: "/images/sites/airbnb.png"},
-                    {site: "apple", url: "http://www.apple.com/", image: "/images/sites/apple.png"},
-                    {site: "blogspot", url: "http://www.blogspot.com/", image: "/images/sites/blogspot.png"},
-                    {site: "imdb", url: "http://www.imdb.com/", image: "/images/sites/imdb.png"},
-                    {site: "bank of america", url: "https://www.bankofamerica.com/", image: "/images/sites/bankofamerica.png"},
-                    {site: "wells fargo", url: "https://www.wellsfargo.com/", image: "/images/sites/wellsfargo.png"},
-                    {site: "weather channel", url: "https://www.weather.com/", image: "/images/sites/weatherchannel.png"},
-                    {site: "sales force", url: "https://www.salesforce.com/", image: "/images/sites/salesforce.png"},
-                    {site: "huffington post", url: "https://www.huffingtonpost.com/", image: "/images/sites/huffington.png"},
-                    {site: "wordpress", url: "https://www.wordpress.com/", image: "/images/sites/wordpress.png"},
-                    {site: "msn", url: "https://www.msn.com/", image: "/images/sites/msn.png"},
+                    {site: "yelp", url: "https://www.yelp.com/", image: "/images/sites/yelp.png"},
+                    
+                    {site: "ebay", url: "http://www.ebay.com", image: "/images/sites/ebay.png"},
+                    {site: "craigslist", url: "http://www.craigslist.com", image: "/images/sites/craigslist.png"},
+                    {site: "paypal", url: "http://www.paypal.com/", image: "/images/sites/paypal.png"},
                     {site: "walmart", url: "https://www.walmart.com/", image: "/images/sites/walmart.png"},
                     {site: "target", url: "https://www.target.com/", image: "/images/sites/target.png"},
                     {site: "wayfair", url: "https://www.wayfair.com/", image: "/images/sites/wayfair.png"},
-                    {site: "yelp", url: "https://www.yelp.com/", image: "/images/sites/yelp.png"},
-                    {site: "washington post", url: "https://www.washingtonpost.com/", image: "/images/sites/washingtonpost.png"},
-                    {site: "dropbox", url: "https://www.dropbox.com/", image: "/images/sites/dropbox.png"},
-                    {site: "zillow", url: "https://www.zillow.com/", image: "/images/sites/zillow.png"},
-                    {site: "microsoft", url: "https://www.microsoft.com/", image: "/images/sites/microsoft.png"},
-                    {site: "foxnews", url: "https://www.foxnews.com/", image: "/images/sites/foxnews.png"},
-                    {site: "wikia", url: "https://www.wikia.com/", image: "/images/sites/wikia.png"},
-                    {site: "indeed", url: "https://www.indeed.com/", image: "/images/sites/indeed.png"},
-                    {site: "stack overflow", url: "https://www.stackoverflow.com/", image: "/images/sites/stackoverflow.png"},
-                    {site: "etsy", url: "https://www.etsy.com/", image: "/images/sites/etsy.png"},
-                    {site: "buzzfeed", url: "http://www.buzzfeed.com/", image: "/images/sites/buzzfeed.png"},
-                    {site: "pandora", url: "https://www.pandora.com/", image: "/images/sites/pandora.png"},
-                    {site: "aol", url: "https://www.aol.com/", image: "/images/sites/aol.png"},
-                    {site: "twitch", url: "https://www.twitch.com/", image: "/images/sites/twitch.png"},
-                    {site: "github", url: "https://www.github.com/", image: "/images/sites/github.png"},
-                    {site: "nfl", url: "https://www.nfl.com/", image: "/images/sites/nfl.png"},
-                    {site: "godaddy", url: "https://www.godaddy.com/", image: "/images/sites/godaddy.png"},
-                    {site: "discover", url: "http://www.discover.com/", image: "/images/sites/discover.png"},
-                    {site: "google drive", url: "http://drive.google.com/", image: "/images/sites/drive.png"},
-                    {site: "google maps", url: "http://maps.google.com/", image: "/images/sites/maps.png"},
-                    {site: "google photos", url: "http://www.google.com/photos", image: "/images/sites/googlephotos.png"},
-                    {site: "gmail", url: "http://mail.google.com/", image: "/images/sites/gmail.png"},
-                    {site: "google hangouts", url: "http://www.google.com/hangouts", image: "/images/sites/hangouts.png"},
-                    {site: "hulu", url: "http://www.hulu.com/", image: "/images/sites/hulu.png"}
+                    {site: "bestbuy", url: "http://www.bestbuy.com/", image: "/images/sites/bestbuy.png"},
+                    {site: "home depot", url: "http://www.homedepot.com/", image: "/images/sites/homedepot.png"},
                     
+                    {site: "cnn", url: "http://www.cnn.com", image: "/images/sites/cnn.png"},
+                    {site: "msn", url: "https://www.msn.com/", image: "/images/sites/msn.png"},
+                    {site: "foxnews", url: "http://www.foxnews.com/", image: "/images/sites/foxnews.png"},
+                    {site: "bbc", url: "http://www.bbc.com/", image: "/images/sites/bbc.png"},
+                    {site: "buzzfeed", url: "http://www.buzzfeed.com/", image: "/images/sites/buzzfeed.png"},
+                    
+                    {site: "new york times", url: "http://www.nytimes.com/", image: "/images/sites/newyorktimes.png"},
+                    {site: "huffington post", url: "https://www.huffingtonpost.com/", image: "/images/sites/huffington.png"},
+                    {site: "washington post", url: "https://www.washingtonpost.com/", image: "/images/sites/washingtonpost.png"},
+                    {site: "forbes", url: "http://www.forbes.com/", image: "/images/sites/forbes.png"},
+                    {site: "daily mail", url: "http://www.dailymail.com/", image: "/images/sites/dailymail.png"},
+                    {site: "wall street journal", url: "http://www.wallstreetjournal.com/", image: "/images/sites/wallstreetjournal.png"},
+                    {site: "business insider", url: "http://www.businessinsider.com/", image: "/images/sites/businessinsider.png"},
+                    
+                    {site: "espn", url: "http://www.espn.com", image: "/images/sites/espn.png"},
+                    {site: "nfl", url: "https://www.nfl.com/", image: "/images/sites/nfl.png"},
+                    
+                    {site: "weather channel", url: "https://www.weather.com/", image: "/images/sites/weatherchannel.png"},
+                    {site: "weather underground", url: "https://www.wunderground.com/", image: "/images/sites/weatherunderground.png"},
+                    
+                    {site: "linkedin", url: "http://www.linkedin.com", image: "/images/sites/linkedin.png"},
+                    {site: "zillow", url: "https://www.zillow.com/", image: "/images/sites/zillow.png"},
+                    {site: "etsy", url: "https://www.etsy.com/", image: "/images/sites/etsy.png"},
+                    {site: "imgur", url: "http://www.imgur.com", image: "/images/sites/imgur.png"},
+                    {site: "blogspot", url: "http://www.blogspot.com/", image: "/images/sites/blogspot.png"},
+                    {site: "wordpress", url: "https://www.wordpress.com/", image: "/images/sites/wordpress.png"},
+                    {site: "imdb", url: "http://www.imdb.com/", image: "/images/sites/imdb.png"},
+                    {site: "wikia", url: "https://www.wikia.com/", image: "/images/sites/wikia.png"},
+                    {site: "sales force", url: "https://www.salesforce.com/", image: "/images/sites/salesforce.png"},
+                    {site: "quora", url: "https://www.quora.com/", image: "/images/sites/quora.png"},
+                    
+                    {site: "apple", url: "http://www.apple.com/", image: "/images/sites/apple.png"},
+                    {site: "microsoft", url: "https://www.microsoft.com/", image: "/images/sites/microsoft.png"},
+                    {site: "adobe", url: "https://www.adobe.com/", image: "/images/sites/adobe.png"},
+                    
+                    {site: "chase", url: "http://www.chase.com", image: "/images/sites/chase.png"},
+                    {site: "bank of america", url: "https://www.bankofamerica.com/", image: "/images/sites/bankofamerica.png"},
+                    {site: "wells fargo", url: "https://www.wellsfargo.com/", image: "/images/sites/wellsfargo.png"},
+                    {site: "discover", url: "http://www.discover.com/", image: "/images/sites/discover.png"},
+                    {site: "capitalone", url: "http://www.capitalone.com/", image: "/images/sites/capitalone.png"},
+                    {site: "americanexpress", url: "http://www.americanexpress.com/", image: "/images/sites/amex.png"},
+                    {site: "intuit", url: "http://www.intuit.com/", image: "/images/sites/intuit.png"},
+                    
+                    {site: "spotify", url: "http://www.spotify.com/", image: "/images/sites/spotify.png"},
+                    {site: "pandora", url: "http://www.pandora.com/", image: "/images/sites/pandora.png"},
+                    {site: "sound cloud", url: "http://www.soundcloud.com/", image: "/images/sites/soundcloud.png"},
+                    {site: "twitch", url: "http://www.twitch.com/", image: "/images/sites/twitch.png"},
+                    {site: "deviantart", url: "http://www.deviantart.com/", image: "/images/sites/deviantart.png"},
+                    
+                    {site: "github", url: "https://www.github.com/", image: "/images/sites/github.png"},
+                    {site: "stack overflow", url: "https://www.stackoverflow.com/", image: "/images/sites/stackoverflow.png"},
+                    {site: "godaddy", url: "https://www.godaddy.com/", image: "/images/sites/godaddy.png"},
+                    
+                    {site: "xfinity", url: "http://www.xfinity.com/", image: "/images/sites/xfinity.png"},
+                    {site: "att", url: "http://www.att.com/", image: "/images/sites/att.png"},
+                    
+                    {site: "walt disney world", url: "https://disneyworld.disney.go.com/", image: "/images/sites/waltdisneyworld.png"},
+                    {site: "disneyland", url: "https://disneyland.disney.go.com/", image: "/images/sites/disneyland.png"},
+                    
+                    {site: "aol", url: "https://www.aol.com/", image: "/images/sites/aol.png"},
+                    
+                    {site: "google drive", url: "http://drive.google.com/", image: "/images/sites/drive.png"},
+                    {site: "google photos", url: "http://photos.google.com/", image: "/images/sites/googlephotos.png"},
+                    {site: "google hangouts", url: "http://www.google.com/hangouts", image: "/images/sites/hangouts.png"},
+                    {site: "google news", url: "http://www.google.com/news", image: "/images/sites/googlenews.png"},
+                    {site: "google translate", url: "http://www.google.com/translate", image: "/images/sites/googletranslate.png"},
+                    {site: "google docs", url: "http://www.google.com/docs", image: "/images/sites/googledocs.png"},
+                    {site: "google sheets", url: "http://www.google.com/sheets", image: "/images/sites/googlesheets.png"},
+                    {site: "google slides", url: "http://www.google.com/slides", image: "/images/sites/googleslides.png"},
+                    {site: "google contacts", url: "http://www.google.com/contacts", image: "/images/sites/googlecontacts.png"},
+                    {site: "google calendar", url: "http://www.google.com/calendar", image: "/images/sites/googlecal.png"}
                    ];
 
 };
